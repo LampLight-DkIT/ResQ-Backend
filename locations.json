@@ -1,0 +1,67 @@
+[
+    {
+        "coords": {
+            "accuracy": 2300.0,
+            "longitude": -6.371945,
+            "altitude": 105.1,
+            "heading": 0,
+            "latitude": 53.6943678,
+            "altitudeAccuracy": 30.1,
+            "speed": 0
+        },
+        "mocked": false,
+        "timestamp": 1698691200000
+    },
+    {
+        "coords": {
+            "accuracy": 1200.0,
+            "longitude": -6.371945,
+            "altitude": 100.0,
+            "heading": 0,
+            "latitude": 53.6941111,
+            "altitudeAccuracy": 25.0,
+            "speed": 1
+        },
+        "mocked": false,
+        "timestamp": 1698777600000
+    },
+    {
+        "coords": {
+            "accuracy": 1800.0,
+            "longitude": -6.372345,
+            "altitude": 110.0,
+            "heading": 45,
+            "latitude": 53.6945678,
+            "altitudeAccuracy": 28.0,
+            "speed": 2
+        },
+        "mocked": false,
+        "timestamp": 1699047600000
+    },
+    {
+        "coords": {
+            "accuracy": 2500.0,
+            "longitude": -6.372145,
+            "altitude": 108.0,
+            "heading": 90,
+            "latitude": 53.6956789,
+            "altitudeAccuracy": 32.0,
+            "speed": 0
+        },
+        "mocked": false,
+        "timestamp": 1699134000000
+    },
+    {
+        "coords": {
+            "accuracy": 2400.0,
+            "longitude": -6.373145,
+            "altitude": 106.5,
+            "heading": 30,
+            "latitude": 53.6935678,
+            "altitudeAccuracy": 31.0,
+            "speed": 1.5
+        },
+        "mocked": false,
+        "timestamp": 1699393200000
+    }
+]
