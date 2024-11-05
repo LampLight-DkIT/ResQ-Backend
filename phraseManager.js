@@ -24,7 +24,7 @@ function addOrUpdatePhrase(codedPhrase, meaning) {
     const phrases = loadPhrases();
     phrases[codedPhrase.toLowerCase()] = meaning; // Add or update the phrase
     savePhrases(phrases);
-    console.log(`Phrase added: "${codedPhrase}" => "${meaning}"`);
+    // console.log(`Phrase added: "${codedPhrase}" => "${meaning}"`);
 }
 
 // Function to read a phrase

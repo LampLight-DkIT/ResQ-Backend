@@ -1,4 +1,5 @@
 {
-  "can we have coffee tomorrow": "I need guard's help",
-  "let's watch a movie": "I need information"
+  "can we have coffee tomorrow": "Tier 1 alert",
+  "let's watch a movie": "Tier 2 alert"
 }
+

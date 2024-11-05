@@ -1,12 +1,8 @@
-const { addOrUpdatePhrase, translatePhrase } = require('./phraseManager');
-
-addOrUpdatePhrase("Can we have coffee tomorrow", "I need guard's help");
-addOrUpdatePhrase("Let's watch a movie", "I need information");
+const { translatePhrase } = require('./phraseManager');
 
 const codedPhrases = [
     "can we have coffee tomorrow",
     "let's watch a movie",
-    "how about a walk later"
 ];
 
 codedPhrases.forEach(phrase => {
@@ -24,7 +20,7 @@ const client = new MongoClient(uri);
 
 // Encryption settings
 const algorithm = "aes-256-cbc";
-const encryptionKey = crypto.randomBytes(32); // Securely generate this key and store it securely
+const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
 const iv = crypto.randomBytes(16);
 
 // Function to encrypt data
