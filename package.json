@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.693.0",
+    "aws-sdk": "^2.1692.0",
     "dotenv": "^16.4.5",
+    "firebase": "^11.0.1",
     "mongodb": "^6.10.0"
   }
 }
