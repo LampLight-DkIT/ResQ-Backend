@@ -1,11 +1,14 @@
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const path = require("path"); // Import the path module
+const mime = require("mime-types");
 require("dotenv").config();
 
-const uploadFileName = "video.mp4";
 const regionName = "eu-west-1";
 const bucketName = "resqdkit";
+
+const filePath = "uploads/text.txt"; 
+const uploadDirectory = "uploads";
 
 const client = new S3Client({
   region: regionName,
@@ -15,29 +18,51 @@ const client = new S3Client({
   },
 });
 
-const uploadFile = async () => {
-  console.log("Starting upload...");
-  const fileContent = fs.readFileSync(`./${uploadFileName}`); // Test file
+const uploadFile = async (filePath, fileName) => {
+  console.log(`Starting upload for ${fileName}...`);
+  
+  const fileContent = fs.readFileSync(filePath);
+  const contentType = mime.lookup(filePath) || "application/octet-stream";
 
   const params = {
     Bucket: bucketName,
-    Key: `uploads/${uploadFileName}`, // S3 key for the test file
+    Key: `uploads/${fileName}`,
     Body: fileContent,
-    ContentType: "video/mp4", // Correct MIME type for text files
+    ContentType: contentType,
+    ServerSideEncryption: "AES256",
   };
 
   try {
     const command = new PutObjectCommand(params);
     const response = await client.send(command);
-    console.log("File uploaded successfully");
+    console.log(`File uploaded successfully: ${fileName}`);
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error(`Error uploading file (${fileName}):`, error);
+  }
+};
+
+const uploadAllFilesInDirectory = async (directory) => {
+  try {
+    const files = fs.readdirSync(directory);
+
+    for (const file of files) {
+      const filePath = path.join(directory, file);
+
+      // Ensure the path is a file (not a directory)
+      if (fs.lstatSync(filePath).isFile()) {
+        await uploadFile(filePath, file); 
+      }
+    }
+
+    console.log("All files uploaded successfully.");
+  } catch (error) {
+    console.error("Error reading directory or uploading files:", error);
   }
 };
 
 const downloadFile = async () => {
-  const downloadFileName = "video.mp4"; // Key of the file in the bucket
-  const localFilePath = path.join(__dirname, "downloaded-video.mp4"); // Path to save the file locally
+  const downloadFileName = "video.mp4"; 
+  const localFilePath = path.join(__dirname, `downloaded-${downloadFileName}`); 
 
   const params = {
     Bucket: bucketName,
@@ -66,6 +91,6 @@ const downloadFile = async () => {
   }
 };
 
-// Uncomment the function you want to test
-// uploadFile();
-downloadFile();
+// uploadFile("./uploads/text.txt", "text2.txt");
+// uploadAllFilesInDirectory(uploadDirectory);
+// downloadFile();
