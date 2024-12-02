@@ -8,7 +8,7 @@ async function connectToDatabase() {
     try {
         await client.connect();
         console.log("Connected to MongoDB");
-        return client.db("ResQ"); // Replace with your database name
+        return client.db("ResQ"); 
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
         throw error;

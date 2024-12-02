@@ -1,14 +1,11 @@
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
-const path = require("path"); // Import the path module
+const path = require("path");
 const mime = require("mime-types");
 require("dotenv").config();
 
 const regionName = "eu-west-1";
 const bucketName = "resqdkit";
-
-const filePath = "uploads/text.txt"; 
-const uploadDirectory = "uploads";
 
 const client = new S3Client({
   region: regionName,
@@ -18,15 +15,14 @@ const client = new S3Client({
   },
 });
 
+// Function to upload a single file
 const uploadFile = async (filePath, fileName) => {
-  console.log(`Starting upload for ${fileName}...`);
-  
   const fileContent = fs.readFileSync(filePath);
   const contentType = mime.lookup(filePath) || "application/octet-stream";
 
   const params = {
     Bucket: bucketName,
-    Key: `uploads/${fileName}`,
+    Key: `uploads/${fileName}`, // Path in the S3 bucket
     Body: fileContent,
     ContentType: contentType,
     ServerSideEncryption: "AES256",
@@ -34,35 +30,40 @@ const uploadFile = async (filePath, fileName) => {
 
   try {
     const command = new PutObjectCommand(params);
-    const response = await client.send(command);
+    await client.send(command);
     console.log(`File uploaded successfully: ${fileName}`);
   } catch (error) {
     console.error(`Error uploading file (${fileName}):`, error);
   }
 };
 
+// Function to upload all files in a directory
 const uploadAllFilesInDirectory = async (directory) => {
   try {
     const files = fs.readdirSync(directory);
-
     for (const file of files) {
       const filePath = path.join(directory, file);
-
-      // Ensure the path is a file (not a directory)
       if (fs.lstatSync(filePath).isFile()) {
-        await uploadFile(filePath, file); 
+        await uploadFile(filePath, file); // Reuse the uploadFile function
       }
     }
-
     console.log("All files uploaded successfully.");
   } catch (error) {
-    console.error("Error reading directory or uploading files:", error);
+    console.error("Error uploading files:", error);
   }
 };
 
+// Function to download a file from the S3 bucket
 const downloadFile = async () => {
-  const downloadFileName = "video.mp4"; 
-  const localFilePath = path.join(__dirname,"..","downloads", `downloaded-${downloadFileName}`); 
+  const downloadFileName = "text.txt"; 
+  const downloadFolder = path.join(__dirname, "../downloads");
+
+  let localFilePath = path.join(__dirname,"../downloads", `downloaded-${downloadFileName}`);
+  let counter = 1;
+  while (fs.existsSync(localFilePath)) {
+    localFilePath = path.join(downloadFolder, `downloaded-${downloadFileName}(${counter})`);
+    counter++;
+  }
 
   const params = {
     Bucket: bucketName,
@@ -70,12 +71,9 @@ const downloadFile = async () => {
   };
 
   try {
-    console.log(`Starting download of ${downloadFileName} from bucket ${bucketName}...`);
-    
     const command = new GetObjectCommand(params);
     const response = await client.send(command);
 
-    // Create a writable stream and pipe the response body to it
     const writableStream = fs.createWriteStream(localFilePath);
     response.Body.pipe(writableStream);
 
@@ -91,6 +89,5 @@ const downloadFile = async () => {
   }
 };
 
-// uploadFile("./uploads/text.txt", "text2.txt");
-// uploadAllFilesInDirectory(uploadDirectory);
-// downloadFile();
+// Export all functions
+module.exports = { uploadFile, uploadAllFilesInDirectory, downloadFile };
