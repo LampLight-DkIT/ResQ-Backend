@@ -1,26 +1,30 @@
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
 
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
+let client; // Reuse client instance
+let db; // Reuse database instance
 
-async function connectToDatabase() {
+const connectToDatabase = async () => {
+    if (db) {
+        return db; // Return existing connection if available
+    }
     try {
+        client = new MongoClient(process.env.MONGODB_URI);
         await client.connect();
         console.log("Connected to MongoDB");
-        return client.db("ResQ"); 
+        db = client.db("ResQ"); // Replace with your database name
+        return db;
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
         throw error;
     }
-}
-
-async function disconnectDatabase() {
-    await client.close();
-    console.log("Disconnected from MongoDB");
-}
-
-module.exports = {
-    connectToDatabase,
-    disconnectDatabase,
 };
+
+const closeDatabase = async () => {
+    if (client) {
+        await client.close();
+        console.log("Disconnected from MongoDB");
+    }
+};
+
+module.exports = { connectToDatabase, closeDatabase };

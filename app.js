@@ -105,6 +105,11 @@ app.get("/s3/download", async (req, res) => {
     }
 });
 
-// Start the server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Export app for testing
+module.exports = app;
+
+// Start the server only when not in test mode
+if (process.env.NODE_ENV !== "test") {
+    const PORT = 3000;
+    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+}
