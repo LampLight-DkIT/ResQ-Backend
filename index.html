@@ -2,51 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Real-Time Location</title>
 </head>
 <body>
-    <h1>WebSocket Test</h1>
-    <button onclick="sendLocation()">Send Location</button>
+    <h1>WebSocket Real-Time Location Updates</h1>
+    <button id="startUpdates" disabled>Start Sending Location Updates</button>
+    <button id="stopUpdates" disabled>Stop Sending Location Updates</button>
     <div id="output"></div>
 
     <script>
         const ws = new WebSocket("ws://localhost:3000");
 
+        // Initial base location (e.g., Dublin coordinates)
+        let currentLocation = {
+            latitude: 53.349805,  // Base latitude
+            longitude: -6.26031  // Base longitude
+        };
+
+        let updateInterval; // Variable to hold the interval ID
+
         ws.onopen = () => {
             console.log("Connected to WebSocket server");
+
+            // Enable the Start button once WebSocket is open
+            document.getElementById("startUpdates").disabled = false;
         };
 
         ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === "locationUpdate") {
-                const output = document.getElementById("output");
-                output.innerHTML += `<p>User ${data.userId} updated location to: ${JSON.stringify(data.location)}</p>`;
+            try {
+                const data = JSON.parse(event.data);
+
+                if (data.type === "welcome") {
+                    console.log("Server Message:", data.message);
+                } else if (data.type === "locationUpdate") {
+                    const output = document.getElementById("output");
+                    output.innerHTML += `<p>User ${data.userId} updated location to: ${JSON.stringify(data.location)}</p>`;
+                }
+            } catch (error) {
+                console.error("Non-JSON message from server:", event.data);
             }
         };
 
         ws.onclose = () => {
             console.log("Disconnected from WebSocket server");
+            // Clear the interval if the WebSocket is closed
+            clearInterval(updateInterval);
+
+            // Disable both buttons
+            document.getElementById("startUpdates").disabled = true;
+            document.getElementById("stopUpdates").disabled = true;
         };
 
         ws.onerror = (error) => {
             console.error("WebSocket error:", error);
         };
 
-        function sendLocation() {
+        // Function to generate a randomized location
+        function generateRandomizedLocation(baseLocation) {
+            const randomDelta = () => (Math.random() - 0.5) * 0.001; // Small random change
+            return {
+                latitude: baseLocation.latitude + randomDelta(),
+                longitude: baseLocation.longitude + randomDelta()
+            };
+        }
+
+        // Function to send randomized location to the server
+        function sendRandomizedLocation() {
             if (ws.readyState === WebSocket.OPEN) {
+                currentLocation = generateRandomizedLocation(currentLocation); // Update current location
                 const message = {
                     type: "updateLocation",
-                    userId: "user1",
-                    location: {
-                        latitude: 53.349805,
-                        longitude: -6.26031,
-                    },
+                    userId: "user1", // Replace with dynamic userId if needed
+                    location: currentLocation
                 };
                 ws.send(JSON.stringify(message));
+                console.log("Sent location update:", message);
             } else {
                 console.error("WebSocket is not open!");
             }
         }
+
+        // Add event listener to the Start button
+        document.getElementById("startUpdates").addEventListener("click", () => {
+            if (!updateInterval) { // Prevent multiple intervals
+                updateInterval = setInterval(() => {
+                    sendRandomizedLocation();
+                }, 2000); // Send updates every 2 seconds
+                console.log("Started sending location updates");
+
+                // Enable Stop button and disable Start button
+                document.getElementById("startUpdates").disabled = true;
+                document.getElementById("stopUpdates").disabled = false;
+            }
+        });
+
+        // Add event listener to the Stop button
+        document.getElementById("stopUpdates").addEventListener("click", () => {
+            if (updateInterval) {
+                clearInterval(updateInterval); // Stop the interval
+                updateInterval = null; // Reset the interval variable
+                console.log("Stopped sending location updates");
+
+                // Enable Start button and disable Stop button
+                document.getElementById("startUpdates").disabled = false;
+                document.getElementById("stopUpdates").disabled = true;
+            }
+        });
     </script>
 </body>
 </html>

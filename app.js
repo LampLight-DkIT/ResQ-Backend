@@ -20,7 +20,7 @@ const app = express();
 const server = http.createServer(app); // HTTP server
 const wss = new WebSocket.Server({ server }); // WebSocket server attached to HTTP
 
-app.use(bodyParser.json()   );
+app.use(bodyParser.json());
 app.use(express.json());
 
 // Session Middleware
@@ -109,6 +109,7 @@ app.get("/s3/download", async (req, res) => {
         res.status(500).json({ message: "S3 download demo failed", error });
     }
 });
+
 // In-memory storage for user locations
 const userLocations = {};
 // WebSocket: Handle connections
@@ -116,7 +117,7 @@ wss.on("connection", (ws) => {
     console.log("New WebSocket client connected");
 
     // Handle incoming messages
-    ws.on("message", (message) => {
+    ws.on("message", async (message) => {
         try {
             const data = JSON.parse(message);
 
@@ -124,6 +125,18 @@ wss.on("connection", (ws) => {
             if (data.type === "updateLocation" && data.userId && data.location) {
                 userLocations[data.userId] = data.location;
                 console.log(`Updated location for user ${data.userId}:`, data.location);
+
+                const db = await connectToDatabase();
+                const locationHistoryCollection = db.collection("location_history");
+
+                const locationUpdate = {
+                    userId: data.userId,
+                    location: data.location,
+                    timestamp: new Date(), // Add a timestamp
+                };
+
+                await locationHistoryCollection.insertOne(locationUpdate); // Insert into MongoDB
+                // console.log(`Saved location for user ${data.userId}:`, locationUpdate);
 
                 // Broadcast updated location to all clients
                 broadcast({
@@ -143,7 +156,7 @@ wss.on("connection", (ws) => {
     });
 
     // Send an initial welcome message
-    ws.send("Welcome to the Real-Time Location WebSocket Server!");
+    ws.send(JSON.stringify({ message: "Welcome to the Real-Time Location WebSocket Server!" }));
 });
 
 function broadcast(data) {
@@ -153,6 +166,46 @@ function broadcast(data) {
         }
     });
 }
+
+app.get("/location/history/:userId", async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const db = await connectToDatabase();
+        const locationHistoryCollection = db.collection("location_history");
+
+        // Query the location history for the given userId
+        const history = await locationHistoryCollection
+            .find({ userId })
+            .sort({ timestamp: 1 })
+            .toArray();
+
+        res.status(200).json({ userId, history });
+    } catch (error) {
+        console.error("Error fetching location history:", error);
+        res.status(500).json({ message: "Failed to retrieve location history" });
+    }
+});
+
+app.get("/location/history", async (req, res) => {
+    try {
+        const db = await connectToDatabase();
+        const locationHistoryCollection = db.collection("location_history");
+
+        // Query all location history
+        const allHistory = await locationHistoryCollection
+            .find({})
+            .sort({ timestamp: 1 })
+            .toArray();
+
+        res.status(200).json({ allHistory });
+    } catch (error) {
+        console.error("Error fetching all location history:", error);
+        res.status(500).json({ message: "Failed to retrieve all location history" });
+    }
+});
+
+
 
 // Export app for testing
 module.exports = app;
