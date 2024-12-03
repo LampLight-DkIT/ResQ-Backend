@@ -16,12 +16,13 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "mime-types": "^2.1.35",
-    "mongodb": "^6.10.0"
+    "mongodb": "^6.10.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "supertest": "^7.0.0"
   }
 }

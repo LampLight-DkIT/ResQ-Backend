@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <button onclick="sendLocation()">Send Location</button>
+    <div id="output"></div>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:3000");
+
+        ws.onopen = () => {
+            console.log("Connected to WebSocket server");
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === "locationUpdate") {
+                const output = document.getElementById("output");
+                output.innerHTML += `<p>User ${data.userId} updated location to: ${JSON.stringify(data.location)}</p>`;
+            }
+        };
+
+        ws.onclose = () => {
+            console.log("Disconnected from WebSocket server");
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        function sendLocation() {
+            if (ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: "updateLocation",
+                    userId: "user1",
+                    location: {
+                        latitude: 53.349805,
+                        longitude: -6.26031,
+                    },
+                };
+                ws.send(JSON.stringify(message));
+            } else {
+                console.error("WebSocket is not open!");
+            }
+        }
+    </script>
+</body>
+</html>
