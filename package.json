@@ -4,26 +4,27 @@
   "description": "",
   "main": "playground-1.mongodb.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
-    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
-    "firebase": "^11.0.1",
+    "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "mime-types": "^2.1.35",
-    "mongodb": "^6.10.0"
+    "mongodb": "^6.10.0",
+    "uid-safe": "^2.1.5",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "supertest": "^7.0.0"
   }
 }
