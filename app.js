@@ -14,7 +14,7 @@ const { connectToDatabase } = require("./db/mongo");
 const { insertEncryptedData } = require("./db/mongoOperations");
 const { encryptData, decryptData } = require("./utils/encryption");
 const { uploadFile, downloadFile, uploadAllFilesInDirectory } = require("./utils/awsS3");
-
+const { authenticateToken, authenticateSession } = require("./middlewares/authMiddleware");
 
 const app = express();
 const server = http.createServer(app); // HTTP server
@@ -203,6 +203,16 @@ app.get("/location/history", async (req, res) => {
         console.error("Error fetching all location history:", error);
         res.status(500).json({ message: "Failed to retrieve all location history" });
     }
+});
+
+// Apply token authentication middleware to protected routes
+app.get('/protected-route', authenticateToken, (req, res) => {
+    res.json({ message: 'This is a protected route', user: req.user });
+});
+  
+  // Apply session authentication middleware to session-protected routes
+app.get('/session-protected-route', authenticateSession, (req, res) => {
+    res.json({ message: 'This is a session-protected route' });
 });
 
 
