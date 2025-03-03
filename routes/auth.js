@@ -2,9 +2,16 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { connectToDatabase } = require("../db/mongo");
+const cors = require('cors');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Enable CORS for all routes in this router
+router.use(cors({
+  origin: 'http://192.168.1.26:8081', // Replace with your mobile app's URL
+  credentials: true,
+}));
 
 // Login Endpoint
 router.post("/login", async (req, res) => {
@@ -14,7 +21,13 @@ router.post("/login", async (req, res) => {
         const db = await connectToDatabase();
         const usersCollection = db.collection("users");
 
-        const user = await usersCollection.findOne({ username });
+        const user = await usersCollection.findOne({
+            $or: [
+                { username: username },
+                { email: username }  // This allows login with email too
+            ]
+        });
+
         if (!user) {
             return res.status(401).json({ message: "Invalid username or password" });
         }
